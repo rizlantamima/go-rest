@@ -1,4 +1,3 @@
 # go-rest
 ## Go aja
-using go before the [generic] era (1.17)
-
+even if this one using version 1.19, I will avoid the [generic] as much as I can

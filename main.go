@@ -1,24 +1,34 @@
 package main
 
 import (
-	"log"
+	"io/ioutil"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
+	"github.com/rizlantamima/go-rest/config"
+	"gopkg.in/yaml.v2"
 )
 
-const PORT string = ":8000"
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusAccepted)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("hello"))
-}
-
 func main() {
-	http.HandleFunc("/", handler)
-	log.Println("Starting a server...")
-
-	err := http.ListenAndServe(PORT, nil)
+	data, err := ioutil.ReadFile("server.yml")
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		return
 	}
+
+	var config config.Config
+
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	e := echo.New()
+	e.GET("/", func(ctx echo.Context) error {
+		return ctx.String(http.StatusOK, "Hello, World!")
+	})
+	var serverAddress string = config.Server.Host + ":" + config.Server.Port
+	e.Logger.Fatal(e.Start(serverAddress))
 }
